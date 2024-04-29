@@ -1,0 +1,123 @@
+INSTALLATION GUIDE OF "EASYPUMP (software solution")
+
+Device used and tested: [Raspberry Pi 3, model: B, 5V Relay, 250VAC-30A, 30VDC-30A, Pedrollo Immersible pump, 230VAC 15.2A]
+
+Script language used and tested: PYTHON 3.9 - PYTHON-VENV3.9
+        
+---------------------------------------------------------------------
+
+device username: raspberry
+device password: easypump-rpi
+device local hostname: easypump.local
+
+#####################################################################
+
+PLEASE FOLLOW THE INSTRUCTIONS FOR A CORRECT INSTALLATION:
+
+at first update the system: sudo apt update && sudo apt upgrade
+then navigate into the EasyPump folder and install python3-venv: sudo apt install python3-venv
+you can now create your virtual environment: python3 -m venv env3.9
+activate it: source env3.9/bin/activate
+install the packages needed for the python script to run correctly: pip3 install -r requirements.txt
+after installing the requirements you can deactivate the virtual envirnoment: deactivate
+now you need to create the service file, this makes your script run automatically at every boot, follow the steps below:
+
+first create the file:  sudo nano /etc/systemd/system/easypump.service
+you will enter an empty file in which you will paste this entire code:
+
+---------------------------------------------------------------------
+[Unit]
+Description=EasyPump, a smart way to control your water flow
+After=network.target
+
+[Service]
+Type=simple
+User=raspberry
+Group=www-data
+WorkingDirectory=/home/raspberry/EasyPump
+Environment="PATH=/home/raspberry/EasyPump/env3.9/bin
+ExecStart=/home/raspberry/EasyPump/env3.9/bin/gunicorn -c /home/raspberry/EasyPump/server.py app:app
+
+[Install]
+WantedBy=multi-user.target
+---------------------------------------------------------------------
+
+you will now install nginx reverse proxy to be able to run the web server on port 80: sudo apt install nginx
+then we will create the configuration: sudo nano /etc/nginx/sites-available/easypump-rpi
+and as the service file, paste the code:
+
+---------------------------------------------------------------------
+server {
+    listen 80;
+    listen [::]:80 ipv6only=on;
+    server_name easypump.local;
+
+    location / {
+        proxy_pass http://127.0.0.1:5000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+---------------------------------------------------------------------
+after the nginx config is ready, enable it: sudo ln -s /etc/nginx/sites-available/easypump-rpi /etc/nginx/sites-enabled/
+restart nginx service: sudo systemctl restart nginx.service
+
+now we are gonna set the raspberry as an access point, in case you don't have a private wi-fi
+if you have a private wi-fi you should configure the raspberry pi device to connect to it.
+in this case we are gonna set the raspberry as an AP: sudo apt install hostapd dnsmasq
+edit the hostapd file: sudo nano /etc/hostapd/hostapd.conf
+once again, paste everything:
+
+---------------------------------------------------------------------
+interface=wlan0
+driver=nl80211
+ssid=easypump
+hw_mode=g
+channel=7
+wmm_enabled=0
+macaddr_acl=0
+auth_algs=1
+ignore_broadcast_ssid=0
+wpa=2
+wpa_passphrase=easypump-rpi
+wpa_key_mgmt=WPA-PSK
+wpa_pairwise=TKIP
+rsn_pairwise=CCMP
+---------------------------------------------------------------------
+
+and then save original dnsmasq configuration: sudo mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig
+so we can edit the new one: sudo nano /etc/dnsmasq.conf
+and paste everything:
+
+---------------------------------------------------------------------
+interface=wlan0
+dhcp-range=192.168.4.2,192.168.4.20,255.255.255.0,24h
+---------------------------------------------------------------------
+
+now edit the dhcp config file to add the new ip addresses: sudo nano /etc/dhcpcd.conf
+and paste the following lines AT THE END OF THE FILE:
+
+---------------------------------------------------------------------
+interface wlan0
+static ip_address=192.168.4.1/24
+nohook wpa_supplicant
+---------------------------------------------------------------------
+
+unmask and enable everything:
+
+sudo systemctl unmask hostapd
+sudo systemctl enable hostapd
+sudo systemctl start hostapd
+sudo systemctl enable dnsmasq
+sudo systemctl start dnsmasq
+
+and reboot: reboot
+if the raspberry pi device get stuck on terminal, just turn it off and on by the power supply
+
+after all this processes you are ready to access the EasyPump PWA, on chrome with android or safari with ios, access easypump.local
+and put it on the desktop, so you can access the pwa features (icon, standalone app, ecc.)

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="/manifest.json">
+    <title>EasyPump</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Anton&display=swap');
+
+        body {
+            background-color: rgb(1, 1, 19);
+            display: flex;
+            justify-content: center;
+            padding-top: 60px;
+            align-items: center;
+            
+        }
+
+        .container {
+            position: relative;
+            background-color: rgb(0, 162, 255);
+            display: flex;
+            justify-content: center;
+            align-items: end;
+            width: 300px;
+            height: 500px;
+            border: 3px solid rgb(0, 255, 234);
+            border-radius: 30px;
+        }
+
+        .btn_off {
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: white;
+            width: 220px;
+            height: 180px;
+            top: 50px;
+            border: 1px solid black;
+            border-radius: 20px;
+        }
+
+        #btn_off {
+            background-color: lightgray;
+            width: 210px;
+            height: 170px;
+            border: 1px solid transparent;
+            border-radius: 20px;
+            font-family: "Anton", sans-serif;
+            font-weight: 400;
+            font-style: normal;
+            font-size: 84px;
+            color: red;
+        }
+
+        .btn_on {
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: white;
+            width: 220px;
+            height: 180px;
+            bottom: 50px;
+            border: 1px solid black;
+            border-radius: 20px;
+        }
+
+        #btn_on {
+            background-color: lightgray;
+            width: 210px;
+            height: 170px;
+            border: 1px solid transparent;
+            border-radius: 20px;
+            font-family: "Anton", sans-serif;
+            font-weight: 400;
+            font-style: normal;
+            font-size: 84px;
+            color: green;
+        }
+
+    </style>
+</head>
+<body>
+    <form id="valueForm" action="/pump_status" method="post">
+        <div class="container">
+            <div class="btn_off">
+                <button id="btn_off" type="submit" name="status" value="OFF"
+                    style="{{ 'background-color: red; color: white;' if button_state == 'OFF' else 'background-color: lightgray; color: red;'}}">OFF</button>
+            </div>
+            <div class="btn_on">
+                <button id="btn_on" type="submit" name="status" value="ON"
+                    style="{{ 'background-color: green; color: white;' if button_state == 'ON' else 'background-color: lightgray; color: green;'}}">ON</button>
+            </div>
+        </div>
+    </form>
+</body>
+</html>
