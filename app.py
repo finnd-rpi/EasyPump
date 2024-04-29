@@ -5,7 +5,7 @@ import atexit
 import time
 import RPi.GPIO as GPIO
 
-# Define Variables
+# Defining Variables
 relay_pin = 17
 button_state = "OFF"
 
