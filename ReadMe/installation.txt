@@ -1,6 +1,6 @@
 INSTALLATION GUIDE OF "EASYPUMP (software solution")
 
-Device used and tested: [Raspberry Pi 3, model: B, 5V Relay, 250VAC-30A, 30VDC-30A, Pedrollo Immersible pump, 230VAC 15.2A]
+Device used and tested: [Raspberry Pi 3, model: B, 5V Relay, 250VAC-30A, 30VDC-30A, Pedrollo subersible pump, 230VAC 15.2A]
 
 Script language used and tested: PYTHON 3.9 - PYTHON-VENV3.9
         
